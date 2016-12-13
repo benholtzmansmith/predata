@@ -28,3 +28,17 @@ def normalize(id):
 def zscore(id):
     window = request.args.get('window')
     return "the id is {0}, the window param is {1}".format(id, window)
+
+@app.route('/signals/combine/')
+def linear_combination():
+    signal_wieght = request.args
+    values = signal_wieght.getlist('signal')
+    split_values = [x.split(',') for x in values]
+    linear_combinations = [
+        equations.compute_linear_combination(
+            json.loads(requests.get(signalsUrl + str(signalId)).text),
+            int(weight)
+        ) for (signalId, weight) in split_values
+    ]
+    response = Response(response = json.dumps(linear_combinations), status= 200, mimetype="application/json")
+    return response
