@@ -16,7 +16,7 @@ def filter_by_date(list_of_dates_values, target_dict, window):
             date_value_dict['date'] <= target_dict['date']
                 and
             date_value_dict['date'] >= (target_dict['date'] - timedelta(days=window))
-        ): yield date_value_dict
+        ): yield date_value_dict['value']
 
 def compute_z_score(inclusive_values, value):
     if len(inclusive_values) == 0: return 0

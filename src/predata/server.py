@@ -38,7 +38,7 @@ def zscore(id):
     formatted_json = [ {"date":date, "value":value} for date, value in zip(formated_dates, values)]
     z_scores = [
         equations.compute_z_score(
-            [date_value_dict['value'] for date_value_dict in equations.filter_by_date(formatted_json, date_dict, window)],
+                equations.filter_by_date(formatted_json, date_dict, window),
                 date_dict['value']
             ) for date_dict in formatted_json
         ]
