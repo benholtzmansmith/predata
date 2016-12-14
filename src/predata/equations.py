@@ -7,7 +7,7 @@ def normalize(unnormalized_array):
     normalized_array = [ 100 * (int - npArray.min())/(npArray.max() - npArray.min()) for int in npArray]
     return normalized_array
 
-def compute_linear_combination(json_data, weight):
+def compute_linear_combination(values, weight):
     return sum(np.multiply(values, weight))
 
 def filter_by_date_inclusive(list_of_dates_values, date, window):
