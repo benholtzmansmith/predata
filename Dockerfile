@@ -16,5 +16,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update --fix-missing && \
    wget && \
   pip install flask
   pip install requests
+  pip install statistics
 
 CMD src/server.py

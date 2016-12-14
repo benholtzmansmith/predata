@@ -1,8 +1,11 @@
+import json
+import requests
+from datetime import datetime
 from flask import Flask, Response
 from flask import request
-import requests, json
+
 import equations
-from datetime import datetime, timedelta
+
 app = Flask(__name__)
 
 baseUrl = 'http://predata-challenge.herokuapp.com'
@@ -34,8 +37,8 @@ def zscore(id):
     formated_dates = [datetime.strptime(x['date'],'%Y-%m-%d') for x in json_data]
     formatted_json = [ {"date":date, "value":value} for date, value in zip(formated_dates, values)]
     z_scores = [
-            equations.compute_z_score(
-                equations.filter_by_date(formatted_json, date_dict, window),
+        equations.compute_z_score(
+            [date_value_dict['value'] for date_value_dict in equations.filter_by_date(formatted_json, date_dict, window)],
                 date_dict['value']
             ) for date_dict in formatted_json
         ]
@@ -50,7 +53,7 @@ def linear_combination():
     split_values = [x.split(',') for x in values]
     linear_combinations = [
         equations.compute_linear_combination(
-            json.loads(requests.get(signalsUrl + str(signalId)).text),
+            [dict['value'] for dict in json.loads(requests.get(signalsUrl + str(signalId)).text)],
             float(weight)
         ) for (signalId, weight) in split_values
     ]
