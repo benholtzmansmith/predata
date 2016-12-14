@@ -33,12 +33,10 @@ def zscore(id):
     response = requests.get(signalsUrl + str(id))
     window = float(request.args.get('window'))
     json_data = json.loads(response.text)
-    values = [x['value'] for x in json_data]
-    formated_dates = [datetime.strptime(x['date'],'%Y-%m-%d') for x in json_data]
-    formatted_json = [ {"date":date, "value":value} for date, value in zip(formated_dates, values)]
+    formatted_json = equations.format_dates(json_data)
     z_scores = [
         equations.compute_z_score(
-                equations.filter_by_date(formatted_json, date_dict, window),
+                equations.filter_by_date_inclusive(formatted_json, date_dict['date'], window),
                 date_dict['value']
             ) for date_dict in formatted_json
         ]
