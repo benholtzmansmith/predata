@@ -72,6 +72,7 @@ def peaks(id):
                 peaks.append(a_dict['date'])
         return Response(response = json.dumps(peaks), status= 200, mimetype="application/json")
     else:
+        #Todo: not completed
         response = requests.get(signalsUrl + str(id))
         boundary = float(request.args.get('boundary'))
         json_data = json.loads(response.text)
