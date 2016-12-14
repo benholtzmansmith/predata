@@ -2,6 +2,7 @@ from flask import Flask, Response
 from flask import request
 import requests, json
 import equations
+from datetime import datetime, timedelta
 app = Flask(__name__)
 
 baseUrl = 'http://predata-challenge.herokuapp.com'
@@ -26,8 +27,21 @@ def normalize(id):
 
 @app.route('/signals/zscore/<id>')
 def zscore(id):
-    window = request.args.get('window')
-    return "the id is {0}, the window param is {1}".format(id, window)
+    response = requests.get(signalsUrl + str(id))
+    window = float(request.args.get('window'))
+    json_data = json.loads(response.text)
+    values = [x['value'] for x in json_data]
+    formated_dates = [datetime.strptime(x['date'],'%Y-%m-%d') for x in json_data]
+    formatted_json = [ {"date":date, "value":value} for date, value in zip(formated_dates, values)]
+    z_scores = [
+            equations.compute_z_score(
+                equations.filter_by_date(formatted_json, date_dict, window),
+                date_dict['value']
+            ) for date_dict in formatted_json
+        ]
+    transformed_response = [ {"date":date_value_dict['date'], "value":z_score} for (date_value_dict, z_score) in zip(json_data, z_scores)]
+    response = Response(response = json.dumps(transformed_response), status= 200, mimetype="application/json")
+    return response
 
 @app.route('/signals/combine/')
 def linear_combination():
@@ -37,7 +51,7 @@ def linear_combination():
     linear_combinations = [
         equations.compute_linear_combination(
             json.loads(requests.get(signalsUrl + str(signalId)).text),
-            int(weight)
+            float(weight)
         ) for (signalId, weight) in split_values
     ]
     response = Response(response = json.dumps(linear_combinations), status= 200, mimetype="application/json")
