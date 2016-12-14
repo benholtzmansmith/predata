@@ -57,3 +57,24 @@ def linear_combination():
     ]
     response = Response(response = json.dumps(linear_combinations), status= 200, mimetype="application/json")
     return response
+
+@app.route('/signals/peaks/<id>')
+def peaks(id):
+    method = request.args.get('method')
+    response = requests.get(signalsUrl + str(id))
+    json_data = list(sorted(json.loads(response.text), key=lambda k: k['date']))
+    if method == "highs":
+        highest = 0
+        peaks = []
+        for a_dict in json_data:
+            if a_dict['value'] > highest:
+                highest = a_dict['value']
+                peaks.append(a_dict['date'])
+        return Response(response = json.dumps(peaks), status= 200, mimetype="application/json")
+    else:
+        response = requests.get(signalsUrl + str(id))
+        boundary = float(request.args.get('boundary'))
+        json_data = json.loads(response.text)
+        formatted_json = equations.format_dates(json_data)
+        equations.filter_by_date_value_inclusive(formatted_json)
+        return Response(response = json.dumps([]), status= 200, mimetype="application/json")

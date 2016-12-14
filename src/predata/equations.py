@@ -19,6 +19,15 @@ def filter_by_date_inclusive(list_of_dates_values, date, window):
         )]
     return list(filtered_data)
 
+def filter_by_date_value_inclusive(list_of_dates_values, date, window):
+    filtered_data = [date_value_dict for date_value_dict in list_of_dates_values
+                     if (
+                         date_value_dict['date'] <= date
+                         and
+                         date_value_dict['date'] >= (date - timedelta(days=window))
+                     )]
+    return list(filtered_data)
+
 def compute_z_score(inclusive_values, value):
     if len(inclusive_values) == 0: return 0
     else:
