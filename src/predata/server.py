@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 from flask import Flask, Response
 from flask import request
-
+import numpy as np
 import equations
 
 app = Flask(__name__)
@@ -46,16 +46,18 @@ def zscore(id):
 
 @app.route('/signals/combine/')
 def linear_combination():
-    signal_wieght = request.args
-    values = signal_wieght.getlist('signal')
+    signal_wieghts = request.args
+    values = signal_wieghts.getlist('signal')
     split_values = [x.split(',') for x in values]
-    linear_combinations = [
-        equations.compute_linear_combination(
-            [dict['value'] for dict in json.loads(requests.get(signalsUrl + str(signalId)).text)],
+    transformed_vectors = [
+        equations.multiply_weight(
+            sorted(json.loads(requests.get(signalsUrl + str(signalId)).text), key=lambda k: k['date']),
             float(weight)
         ) for (signalId, weight) in split_values
     ]
-    response = Response(response = json.dumps(linear_combinations), status= 200, mimetype="application/json")
+    transposed = equations.transpose(transformed_vectors)
+    combined_vectors = [equations.combine_preserve_date(x) for x in transposed]
+    response = Response(response = json.dumps(combined_vectors), status= 200, mimetype="application/json")
     return response
 
 @app.route('/signals/peaks/<id>')
